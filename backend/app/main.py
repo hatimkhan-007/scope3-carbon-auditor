@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from sqlalchemy import text
+from app.database import engine
 
 app = FastAPI(
     title="OmniScope AI",
@@ -19,3 +21,19 @@ def health_check():
     return {
         "Status": "healthy"
     }
+
+@app.get("/db-health")
+def database_health():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+
+        return {
+            "status": "connected",
+            "database": "PostgreSQL"
+        }
+    except Exception as error:
+        return {
+            "status": "error",
+            "message": str(error)
+        }
